@@ -15,7 +15,7 @@ const verifyEmail = async (req, res, next) => {
         const { token } = req.query;
         jwt.verify(token, process.env.JWT_SECRET, async (err, data) => {
             if (err) {
-                return res.send("<h1>Failed to verify</h1>");
+                return res.status(400).send("<h1>Failed to verify</h1>");
             }
 
             const user = await prisma.user.findUnique({
@@ -25,7 +25,7 @@ const verifyEmail = async (req, res, next) => {
             });
 
             if (!user) {
-                res.status(400).send("<h1>User not found</h1>");
+                res.status(404).send("<h1>User not found</h1>");
             }
 
             await prisma.user.update({
@@ -59,7 +59,7 @@ const requestVerifyEmail = async (req, res, next) => {
         const name = req.user.name || req.user.email.split("@")[0];
         const token = jwt.sign({ id: req.user.id }, process.env.JWT_SECRET, {expiresIn: "30m"});
         const url = `${req.protocol}://${req.get("host")}/api/v1/verify?token=${token}`;
-        const html = await getHTML("verification-code.ejs", { name: name, verification_code: token, verification_url: url });
+        const html = await getHTML("verification-code.ejs", { name: name, verification_url: url });
 
         await sendEmail(req.user.email, "Email Verification", html);
         return res.send("A verification link has been sent to your email account. The token will expire in 30 minutes.");
@@ -87,7 +87,7 @@ const resetPassword = async (req, res, next) => {
 
         jwt.verify(token, process.env.JWT_SECRET, async (err, data) => {
             if (err) {
-                return res.send("<h1>Failed to verify</h1>");
+                return res.status(400).send("<h1>Failed to verify</h1>");
             }
 
             const user = await prisma.user.findUnique({
@@ -97,7 +97,7 @@ const resetPassword = async (req, res, next) => {
             });
 
             if (!user) {
-                res.send("<h1>User not found</h1>");
+                res.status(404).send("<h1>User not found</h1>");
             }
 
             await prisma.user.update({
@@ -141,7 +141,7 @@ const requestResetPassword = async (req, res, next) => {
         const email = req.body.email;
 
         if (!email) {
-            return res.send("email not provided");
+            return res.status(400).send("email not provided");
         }
 
         const user = await prisma.user.findUnique({
@@ -151,7 +151,7 @@ const requestResetPassword = async (req, res, next) => {
         });
 
         if (!user) {
-            return res.send("user not found");
+            return res.status(404).send("user not found");
         }
 
         const name = user.name || user.email.split("@")[0];

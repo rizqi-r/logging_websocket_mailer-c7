@@ -62,7 +62,7 @@ const dashboard = async (req, res, next) => {
         });
 
         if (!user) {
-            return res.send("user not found");
+            return res.status(404).send("user not found");
         }
 
         const notification = await prisma.notification.findMany({

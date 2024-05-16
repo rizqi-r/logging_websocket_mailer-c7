@@ -49,7 +49,7 @@ const register = async (req, res, next) => {
             user_id: user.id
         });
 
-        return res.status(201).redirect(`${req.protocol}://${req.get("host")}/login`);
+        return res.status(301).redirect(`${req.protocol}://${req.get("host")}/login`);
     } catch (error) {
         Sentry.captureException(error);
         next(error);
@@ -83,7 +83,7 @@ const login = async (req, res, next) => {
 
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
-        return res.redirect(`${req.protocol}://${req.get("host")}/dashboard?token=${token}`);
+        return res.status(302).redirect(`${req.protocol}://${req.get("host")}/dashboard?token=${token}`);
     } catch (error) {
         Sentry.captureException(error);
         next(error);
