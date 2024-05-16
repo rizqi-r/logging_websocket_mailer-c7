@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <style>
+        * {
+            font-family: 'Poppins';
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header,
+        nav,
+        main,
+        footer {
+            margin: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        li p {
+            color: grey;
+        }
+    </style>
+    <header>
+        <h1>UserId: <span id="user_id"><%= user_id %></span></h1>
+        <h1>Email: <span id="email"><%= email %></span></h1>
+        <h1>Email Status: <span id="email_status"><%= email_status %></span></h1>
+        <a href="<%= url %>/forgot-password" target="_blank"><button>Forgot Password</button></a>
+        <% if (email_status !=="Verified" ) { %>
+            <a href="<%= url %>/api/v1/request-verify?token=<%= token %>" target="_blank"><button>Request Verify</button></a>
+        <% } %>
+        <br>
+        <br>
+    </header>
+
+    <main>
+        <h3>Unread notification: <span id="unread-notif">0</span></h3>
+        <h2>Notification List</h2>
+        <ul id="notification-list">
+            <% notifications.forEach((a, i)=> { %>
+                <div>
+                    <hr>
+                    <li>
+                        <b>
+                            <%= notifications.length - i %>. <%= a.title %>
+                        </b>
+                    </li>
+                    <li>
+                        <p>
+                            <%= a.body %>
+                        </p>
+                    </li>
+                </div>
+            <% }) %>
+        </ul>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const userId = "<%= user_id %>";
+        const socket = io();
+        const notifications = document.getElementById("notification-list");
+        let notificationCounter = notifications.children.length;
+
+        socket.on(`user-${userId}`, (n) => {
+            if (n.email_status) {
+                return document.getElementById("email_status").innerHTML = n.email_status;
+            };
+
+            // const item = document.createElement('li');
+            // item.innerHTML = `
+            //     <b style="color: black;">${n.title} (Unread)</b>
+            //     <p style="color: black;">${n.body}</p>
+            // `;
+            // notifications.append(item);
+
+            notificationCounter++;
+
+            const item = document.createElement('div');
+            item.innerHTML = `
+                <hr>
+                <li><b style="color: black;">${notificationCounter}. ${n.title} (Unread)</b></li>
+                <li><p style="color: black;">${n.body}</p></li>
+            `;
+            notifications.prepend(item);
+
+            document.getElementById("unread-notif").innerHTML++;
+        });
+    </script>
+</body>
+</html>
