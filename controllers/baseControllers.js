@@ -66,6 +66,9 @@ const dashboard = async (req, res, next) => {
         }
 
         const notification = await prisma.notification.findMany({
+            orderBy: {
+                id: "desc"
+            },
             where: {
                 userId: user.id
             }
